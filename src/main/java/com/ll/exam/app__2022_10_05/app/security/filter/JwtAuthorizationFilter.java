@@ -5,12 +5,10 @@ import com.ll.exam.app__2022_10_05.app.member.service.MemberService;
 import com.ll.exam.app__2022_10_05.app.security.entity.MemberContext;
 import com.ll.exam.app__2022_10_05.app.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,7 +35,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
             if (jwtProvider.verify(token)) {
                 Map<String, Object> claims = jwtProvider.getClaims(token);
-                Member member = Member.fromJwtClaims(claims);
+
+                // 캐시(레디스)를 통해서
+                Member member = memberService.findByUsername((String) claims.get("username")).get();
 
                 forceAuthentication(member);
             }
