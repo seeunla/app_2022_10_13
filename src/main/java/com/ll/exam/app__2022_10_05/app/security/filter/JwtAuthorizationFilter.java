@@ -38,7 +38,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 Map<String, Object> claims = jwtProvider.getClaims(token);
 
                 // 캐시(레디스)를 통해서
-                Member member = memberService.findByUsername((String) claims.get("username")).get();
+                Member member = memberService.getByUsername__cached((String) claims.get("username"));
 
                 if ( memberService.verifyWithWhiteList(member, token) ) {
                     forceAuthentication(member);
