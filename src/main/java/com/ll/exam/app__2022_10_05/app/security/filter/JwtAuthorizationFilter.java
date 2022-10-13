@@ -33,13 +33,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (bearerToken != null) {
             String token = bearerToken.substring("Bearer ".length());
 
+            // 1차 체크(정보가 변조되지 않았는지 체크)
             if (jwtProvider.verify(token)) {
                 Map<String, Object> claims = jwtProvider.getClaims(token);
 
                 // 캐시(레디스)를 통해서
                 Member member = memberService.findByUsername((String) claims.get("username")).get();
 
-                forceAuthentication(member);
+                if ( memberService.verifyWithWhiteList(member, token) ) {
+                    forceAuthentication(member);
+                }
             }
         }
 
